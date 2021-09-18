@@ -185,15 +185,6 @@ function App() {
   }
 
   return (
-<<<<<<< Updated upstream
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Primer deploy via Github actions brother
-        </p>
-      </header>
-=======
     <div>
       {isLoading ? (
         <div>
@@ -279,7 +270,6 @@ function App() {
 
         </div>
       )}
->>>>>>> Stashed changes
     </div>
   );
 }
