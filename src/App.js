@@ -20,6 +20,7 @@ import Grid from '@material-ui/core/Grid';
 import ReactLoading from 'react-loading';
 import Success from './components/success'
 import Error from './components/error'
+import db from './controller/db'
 
 const useStyles = makeStyles({
   card: {
@@ -85,7 +86,13 @@ function App() {
   const [openError, setOpenError] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState(true)
+  const [errorTenant, setErrorTenant] = React.useState(false)
   const [loaded, setLoaded] = React.useState(false)
+  const [token, setToken] = React.useState('')
+
+  useEffect(() => {
+    redirigir()
+  }, [token])
 
   const handleChange = (prop) => (event) => {
     setValues({ ...values, [prop]: event.target.value, flag: false });
@@ -103,23 +110,26 @@ function App() {
     event.preventDefault();
   };
 
-  const login = () => {
+  const login = async () => {
     handleFlag()
-    //callback llamada al back:
     if (values.email !== '' && values.password !== '') {
       setIsLoading(true)
-      setTimeout(function () { //simulo llamada al back
+      let res = await db(values.email, values.password, tenant) //llamada al back
+      if (res.rdo === 200) { //si las credenciales son correctas redirijo
         setLoaded(true)
-        setError(true) //si las credenciales son correctas redirijo | si las credenciales son incorrectas -> reintentar
-      }, 2000);
-
+        setError(false)
+        setToken(res.data.token)
+      } else if (res.rdo === 401) { // si las credenciales son incorrectas -> reintentar
+        setLoaded(true)
+        setError(true)
+      } else if(res.rdo === 500) { // el usuario no pertenece al tenant
+        setLoaded(true)
+        setError(false)
+        setErrorTenant(true)
+      }
     } else {
       handleClickError()
     }
-  }
-
-  const recuperar = () => {
-    window.location.href = 'https://www.google.com/'
   }
 
   const handleClickError = () => {
@@ -139,19 +149,19 @@ function App() {
       setTimeout(() => {
         switch (tenant) {
           case 'web': {
-            window.location.href = 'https://www.web.com'
+            window.location = 'https://www.web.com/?token=' + token
             break
           }
           case 'facturacion': {
-            window.location.href = 'https://www.facturacion.com'
+            window.location = 'https://www.facturacion.com/?token=' + token
             break
           }
           case 'suscripciones': {
-            window.location.href = 'https://www.suscripciones.com'
+            window.location = 'https://www.suscripciones.com/?token=' + token
             break
           }
           case 'cms': {
-            window.location.href = 'https://www.cms.com'
+            window.location = 'https://www.cms.com/?token=' + token
             break
           }
         }
@@ -160,14 +170,13 @@ function App() {
   }
 
   const respuesta = () => {
-    if (loaded && !error) {
+    if (loaded && !error && !errorTenant) {
       return (
         <div>
           <Success />
-          {redirigir()}
         </div>
       )
-    } else if (loaded && error) {
+    } else if (loaded && error && !errorTenant) {
       return (
         <div>
           <Error />
@@ -175,13 +184,43 @@ function App() {
           <Button className={classes.button} variant="contained" color="primary" onClick={handleIsLoading}><b>Reintentar</b></Button>
         </div>
       )
-    } else {
+    } else if(loaded && !error && errorTenant){
+      return(
+        <div>
+          <Error />
+          <div style={{ textAlign: 'center' }}>No posee los permisos para usar este servicio</div>
+          <Button className={classes.button} variant="contained" color="primary" onClick={sinPermisos}><b>Ok</b></Button>
+        </div>
+      )
+    }
+    else {
       return (<ReactLoading className={classes.loading} type={'spin'} color={'#4285F4'} height={'50%'} width={'50%'} />)
     }
   }
 
   const handleIsLoading = () => {
     setIsLoading(false)
+  }
+
+  const sinPermisos = () => {
+    switch (tenant) {
+      case 'web': {
+        window.location = 'https://www.web.com/'
+        break
+      }
+      case 'facturacion': {
+        window.location = 'https://www.facturacion.com/'
+        break
+      }
+      case 'suscripciones': {
+        window.location = 'https://www.suscripciones.com/'
+        break
+      }
+      case 'cms': {
+        window.location = 'https://www.cms.com/'
+        break
+      }
+    }
   }
 
   return (
@@ -256,7 +295,6 @@ function App() {
                       }}
                     />
                   </FormControl>
-                  <b className={classes.hl} onClick={recuperar}>¿Olvidaste tu contraseña?</b>
                   <Button className={classes.button} variant="contained" color="primary" onClick={login} ><b>Iniciar Sesión</b></Button>
                 </CardContent>
               </Card>
