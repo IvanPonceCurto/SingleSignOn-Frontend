@@ -20,7 +20,7 @@ import Grid from '@material-ui/core/Grid';
 import ReactLoading from 'react-loading';
 import Success from './components/success'
 import Error from './components/error'
-import db from './controller/db'
+import {getCredentials} from './controller/users.controller'
 
 const useStyles = makeStyles({
   card: {
@@ -71,9 +71,6 @@ const useStyles = makeStyles({
 });
 
 function App() {
-  const queryString = window.location.search;
-  const urlParams = new URLSearchParams(queryString);
-  const tenant = urlParams.get('tenant')
 
   const classes = useStyles();
   const [values, setValues] = React.useState({
@@ -89,10 +86,12 @@ function App() {
   const [errorTenant, setErrorTenant] = React.useState(false)
   const [loaded, setLoaded] = React.useState(false)
   const [token, setToken] = React.useState('')
+  const [clientUrl, setClientUrl] = React.useState('');
 
   useEffect(() => {
-    redirigir()
+    redirigir(clientUrl)
   }, [token])
+
 
   const handleChange = (prop) => (event) => {
     setValues({ ...values, [prop]: event.target.value, flag: false });
@@ -111,14 +110,23 @@ function App() {
   };
 
   const login = async () => {
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const tenant = urlParams.get('tenant')
     handleFlag()
     if (values.email !== '' && values.password !== '') {
       setIsLoading(true)
-      let res = await db(values.email, values.password, tenant) //llamada al back
+      let res = await getCredentials(values.email, values.password, tenant) //llamada al back
       if (res.rdo === 200) { //si las credenciales son correctas redirijo
         setLoaded(true)
         setError(false)
         setToken(res.data.token)
+        setClientUrl(res.data.redirect)
+        //redirigir(res.data.redirect);
+        setTimeout(() => {
+          window.location.assign(res.data.redirect);
+        },1500
+        )
       } else if (res.rdo === 401) { // si las credenciales son incorrectas -> reintentar
         setLoaded(true)
         setError(true)
@@ -144,30 +152,16 @@ function App() {
     setOpenError(false);
   };
 
-  const redirigir = () => {
+  const redirigir = (url) => {
+    
     if (!error) {
       setTimeout(() => {
-        switch (tenant) {
-          case 'web': {
-            window.location = 'https://www.web.com/?token=' + token
-            break
-          }
-          case 'facturacion': {
-            window.location = 'https://www.facturacion.com/?token=' + token
-            break
-          }
-          case 'suscripciones': {
-            window.location = 'https://www.suscripciones.com/?token=' + token
-            break
-          }
-          case 'cms': {
-            window.location = 'https://www.cms.com/?token=' + token
-            break
-          }
-        }
+        window.location = url;
+          
       }, 1500);
     }
   }
+  //+'?token=' + token
 
   const respuesta = () => {
     if (loaded && !error && !errorTenant) {
@@ -189,7 +183,7 @@ function App() {
         <div>
           <Error />
           <div style={{ textAlign: 'center' }}>No posee los permisos para usar este servicio</div>
-          <Button className={classes.button} variant="contained" color="primary" onClick={sinPermisos}><b>Ok</b></Button>
+          <Button className={classes.button} variant="contained" color="primary"><b>Ok</b></Button>
         </div>
       )
     }
@@ -202,26 +196,7 @@ function App() {
     setIsLoading(false)
   }
 
-  const sinPermisos = () => {
-    switch (tenant) {
-      case 'web': {
-        window.location = 'https://www.web.com/'
-        break
-      }
-      case 'facturacion': {
-        window.location = 'https://www.facturacion.com/'
-        break
-      }
-      case 'suscripciones': {
-        window.location = 'https://www.suscripciones.com/'
-        break
-      }
-      case 'cms': {
-        window.location = 'https://www.cms.com/'
-        break
-      }
-    }
-  }
+ 
 
   return (
     <div>
