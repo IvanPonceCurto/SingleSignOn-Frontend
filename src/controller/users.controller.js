@@ -1,4 +1,4 @@
-const getCredentials = async function (email, password, tenant){
+const getCredentials = async (email, password, tenant)=>{
 
     let url = 'http://localhost:8080/api/users/login' //url al back
    
@@ -24,4 +24,4 @@ const getCredentials = async function (email, password, tenant){
 
 module.exports = {
     getCredentials
-}
+};

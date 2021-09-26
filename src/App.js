@@ -20,7 +20,7 @@ import Grid from '@material-ui/core/Grid';
 import ReactLoading from 'react-loading';
 import Success from './components/success'
 import Error from './components/error'
-import {getCredentials} from './controller/users.controller'
+const {getCredentials} = require('./controller/users.controller')
 
 const useStyles = makeStyles({
   card: {
