@@ -124,7 +124,7 @@ function App() {
         setClientUrl(res.data.redirect)
         //redirigir(res.data.redirect);
         setTimeout(() => {
-          window.location.assign(res.data.redirect);
+          window.location.assign(res.data.redirect);   //+'?token=' + token
         },1500
         )
       } else if (res.rdo === 401) { // si las credenciales son incorrectas -> reintentar
@@ -161,7 +161,7 @@ function App() {
       }, 1500);
     }
   }
-  //+'?token=' + token
+
 
   const respuesta = () => {
     if (loaded && !error && !errorTenant) {
