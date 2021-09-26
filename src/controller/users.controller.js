@@ -1,6 +1,6 @@
 const getCredentials = async (email, password, tenant)=>{
 
-    let url = 'http://localhost:8080/api/users/login' //url al back
+    let url = 'https://singlesignonbackend.herokuapp.com/api/users/login' //url al back
    
     try
     {
