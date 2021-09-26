@@ -117,6 +117,7 @@ function App() {
     if (values.email !== '' && values.password !== '') {
       setIsLoading(true)
       let res = await getCredentials(values.email, values.password, tenant) //llamada al back
+      console.log("XX - CAMBIO PARA GITHUB ACTIONS")
       if (res.rdo === 200) { //si las credenciales son correctas redirijo
         setLoaded(true)
         setError(false)
