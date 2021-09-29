@@ -83,7 +83,6 @@ function App() {
   const [openError, setOpenError] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false)
   const [error, setError] = React.useState(true)
-  const [errorTenant, setErrorTenant] = React.useState(false)
   const [loaded, setLoaded] = React.useState(false)
   const [token, setToken] = React.useState('')
   const [clientUrl, setClientUrl] = React.useState('');
@@ -131,11 +130,7 @@ function App() {
       } else if (res.rdo === 401) { // si las credenciales son incorrectas -> reintentar
         setLoaded(true)
         setError(true)
-      } else if(res.rdo === 500) { // el usuario no pertenece al tenant
-        setLoaded(true)
-        setError(false)
-        setErrorTenant(true)
-      }
+      } 
     } else {
       handleClickError()
     }
@@ -165,13 +160,13 @@ function App() {
 
 
   const respuesta = () => {
-    if (loaded && !error && !errorTenant) {
+    if (loaded && !error) {
       return (
         <div>
           <Success />
         </div>
       )
-    } else if (loaded && error && !errorTenant) {
+    } else if (loaded && error) {
       return (
         <div>
           <Error />
@@ -179,15 +174,7 @@ function App() {
           <Button className={classes.button} variant="contained" color="primary" onClick={handleIsLoading}><b>Reintentar</b></Button>
         </div>
       )
-    } else if(loaded && !error && errorTenant){
-      return(
-        <div>
-          <Error />
-          <div style={{ textAlign: 'center' }}>No posee los permisos para usar este servicio</div>
-          <Button className={classes.button} variant="contained" color="primary"><b>Ok</b></Button>
-        </div>
-      )
-    }
+    } 
     else {
       return (<ReactLoading className={classes.loading} type={'spin'} color={'#4285F4'} height={'50%'} width={'50%'} />)
     }
