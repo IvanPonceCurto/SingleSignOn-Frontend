@@ -123,8 +123,11 @@ function App() {
         setToken(res.data.token)
         setClientUrl(res.data.redirect)
         //redirigir(res.data.redirect);
+        let url = new URL(res.data.redirect);
+        url.searchParams.append('token',res.data.token)
+
         setTimeout(() => {
-          window.location.assign(res.data.redirect);   //+'?token=' + token
+          window.location.assign(url);   //+'?token=' + token
         },1500
         )
       } else if (res.rdo === 401) { // si las credenciales son incorrectas -> reintentar
